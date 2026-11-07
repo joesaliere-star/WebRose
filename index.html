@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Бордовая роза</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@1,6..96,500&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a text column on the left, the rose on a tall stage on the right; stacked on phones.
+     Single deliberate look: wine-black ground, burgundy petals, muted green. */
+  :root {
+    color-scheme: dark;
+    --bg: #0d0508;
+    --ink: #ecd9db;
+    --mute: #a0838a;
+    --rule: #2b141a;
+    --wine: #a31d3d;
+    --bloom: #f08a98;
+    --f-display: "Bodoni Moda", "Didot", Georgia, serif;
+    --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  html, body { min-height: 100%; }
+  body { overflow-x: hidden; touch-action: manipulation; -webkit-touch-callout: none; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--f-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 44px;
+  }
+  .page {
+    max-width: 1080px;
+    margin-inline: auto;
+    display: grid;
+    gap: 24px 56px;
+    grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
+    grid-template-areas: "head stage" "info stage";
+    grid-template-rows: auto 1fr;
+  }
+  .head { grid-area: head; align-self: start; padding-top: 12px; }
+  .stage { grid-area: stage; display: flex; justify-content: center; min-width: 0; }
+  .info { grid-area: info; align-self: end; min-width: 0; }
+
+  .kicker {
+    margin: 0 0 14px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+  h1 {
+    margin: 0 0 18px;
+    font-family: var(--f-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.6rem, 6vw, 3.9rem);
+    line-height: 1.02;
+    text-wrap: balance;
+    color: var(--bloom);
+  }
+  .lede { margin: 0; max-width: 34ch; color: var(--ink); }
+
+  canvas { display: block; max-width: 100%; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+  canvas:active { cursor: grabbing; }
+
+  .ctrl { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  button {
+    font: 500 12px/1 var(--f-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 11px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--wine); color: var(--bloom); }
+  button:focus-visible { outline: 2px solid var(--bloom); outline-offset: 2px; }
+  .hint { margin: 0 0 22px; color: var(--mute); }
+
+  .facts { margin: 0 0 22px; display: grid; gap: 0; border-top: 1px solid var(--rule); }
+  .facts div {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding: 9px 0; border-bottom: 1px solid var(--rule);
+  }
+  .facts dt { color: var(--mute); }
+  .facts dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .ramp-label { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
+  .ramp { font-size: 18px; letter-spacing: 0.08em; overflow-wrap: anywhere; }
+
+  @media (max-width: 820px) {
+    .page {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "head" "stage" "info";
+      grid-template-rows: none;
+      gap: 20px;
+    }
+    .head { padding-top: 0; }
+  }
+</style>
+
+</head>
+<body>
+<main class="page">
+  <header class="head">
+    <p class="kicker">Код-арт · буквы, цифры, знаки</p>
+    <h1>Бордовая роза</h1>
+    <p class="lede">Цветок собран из параметрической поверхности, повёрнут, освещён и переведён в сетку символов по яркости.</p>
+  </header>
+
+  <section class="stage" id="stage">
+    <canvas id="rose" role="img" aria-label="Бордовая роза, нарисованная символами: бутон раскрывается и медленно поворачивается"></canvas>
+  </section>
+
+  <section class="info">
+    <div class="ctrl">
+      <button id="replay" type="button">Заново</button>
+      <button id="pause" type="button">Пауза</button>
+    </div>
+    <p class="hint">Потяните цветок вбок, чтобы повернуть. Три быстрых клика по цветку рассыплют его на частицы и соберут в сердце, ещё три вернут розу.</p>
+    <p class="sr" id="live" aria-live="polite"></p>
+    <dl class="facts">
+      <div><dt>Сетка</dt><dd id="f-grid"></dd></div>
+      <div><dt>Точек поверхности</dt><dd id="f-pts"></dd></div>
+      <div><dt>Свет</dt><dd>два источника, один движется</dd></div>
+    </dl>
+    <p class="ramp-label">От тени к блику</p>
+    <div class="ramp" id="ramp" aria-hidden="true"></div>
+  </section>
+</main>
+
+<script>
+/*ENGINE-START*/
+var PI = Math.PI, TAU = PI * 2;
+var COLS = (typeof window !== 'undefined' && window.innerWidth < 620) ? 60 : 84, ASPECT = 2, NL = 40;
+var NT = 1100, NR = 70;
+var TILT = 0.5;
+var BLOOM_T0 = 2.0, BLOOM_D = 8.0, BLOOM_END = BLOOM_T0 + BLOOM_D;
+var RAMP = ".,:;!i1tlIfjLCOQ0#8%@";
+
+function ease(v) { return v <= 0 ? 0 : v >= 1 ? 1 : v * v * (3 - 2 * v); }
+function hexRGB(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+function makePalette(stops, n) {
+  var out = [], k, i;
+  for (k = 0; k < n; k++) {
+    var p = (k + 0.5) / n, a = stops[0], b = stops[stops.length - 1];
+    for (i = 0; i < stops.length - 1; i++) { if (p >= stops[i][0] && p <= stops[i + 1][0]) { a = stops[i]; b = stops[i + 1]; break; } }
+    var f = b[0] === a[0] ? 0 : (p - a[0]) / (b[0] - a[0]), ca = hexRGB(a[1]), cb = hexRGB(b[1]);
+    out.push('rgb(' + Math.round(ca[0] + (cb[0] - ca[0]) * f) + ',' + Math.round(ca[1] + (cb[1] - ca[1]) * f) + ',' + Math.round(ca[2] + (cb[2] - ca[2]) * f) + ')');
+  }
+  return out;
+}
+var PAL = [
+  makePalette([[0, '#14030a'], [0.18, '#3d0817'], [0.38, '#6e0f2a'], [0.58, '#9c1c3b'], [0.78, '#cf3f5a'], [0.92, '#ee8493'], [1, '#ffd9dc']], NL),
+  makePalette([[0, '#050f09'], [0.3, '#0f3320'], [0.6, '#25663f'], [0.85, '#5aa874'], [1, '#c9f2d0']], NL)
+];
+
+/* ---------- geometry ---------- */
+var bX = [], bY = [], bZ = [], bNX = [], bNY = [], bNZ = [], bG = [], bK = [], bR = [];
+
+function addSurface(nu, nv, fn, nfn, grp, keyOf, rOf) {
+  var P = new Array(nu * nv), i, j;
+  for (i = 0; i < nu; i++) for (j = 0; j < nv; j++) P[i * nv + j] = fn(i / (nu - 1), j / (nv - 1));
+  for (i = 0; i < nu; i++) for (j = 0; j < nv; j++) {
+    var p = P[i * nv + j], u = i / (nu - 1), v = j / (nv - 1), n;
+    if (nfn) { n = nfn(u, v); }
+    else {
+      var a0 = P[Math.max(i - 1, 0) * nv + j], a1 = P[Math.min(i + 1, nu - 1) * nv + j];
+      var b0 = P[i * nv + Math.max(j - 1, 0)], b1 = P[i * nv + Math.min(j + 1, nv - 1)];
+      var ax = a1[0] - a0[0], ay = a1[1] - a0[1], az = a1[2] - a0[2];
+      var bx = b1[0] - b0[0], by = b1[1] - b0[1], bz = b1[2] - b0[2];
+      var cx = ay * bz - az * by, cy = az * bx - ax * bz, cz = ax * by - ay * bx;
+      var l = Math.hypot(cx, cy, cz);
+      n = l > 1e-9 ? [cx / l, cy / l, cz / l] : [0, 0, 1];
+    }
+    bX.push(p[0]); bY.push(p[1]); bZ.push(p[2]);
+    bNX.push(n[0]); bNY.push(n[1]); bNZ.push(n[2]);
+    bG.push(grp); bK.push(keyOf(u, v)); bR.push(rOf(u, v));
+  }
+}
+
+/* rose head: parametric surface, r runs from the petal axis to the rim, th winds from outer to inner petals */
+function roseFn(u, v) {
+  var th = -2 * PI + 17 * PI * u, r = v;
+  var m = ((3.6 * th) % TAU + TAU) % TAU;
+  var x = 1 - 0.5 * Math.pow(1.25 * Math.pow(1 - m / PI, 2) - 0.25, 2);
+  var phi = (PI / 2) * Math.exp(-th / (8 * PI));
+  var y = 1.95653 * r * r * Math.pow(1.27689 * r - 1, 2) * Math.sin(phi);
+  var r2 = x * (r * Math.sin(phi) + y * Math.cos(phi));
+  return [r2 * Math.sin(th), r2 * Math.cos(th), x * (r * Math.cos(phi) - y * Math.sin(phi))];
+}
+addSurface(NT, NR, roseFn, null, 0, function (u) { return -2 * PI + 17 * PI * u; }, function (u, v) { return v; });
+
+/* stem */
+function stemC(s) { return [0.25 * s * s, 0, -0.12 - 1.7 * s]; }
+function stemFrame(s) {
+  var tx = 0.5 * s, tz = -1.7, l = Math.hypot(tx, tz); tx /= l; tz /= l;
+  return [[0, 1, 0], [-tz, 0, tx]];
+}
+function stemFn(u, v) {
+  var c = stemC(u), f = stemFrame(u), a = v * TAU, rad = 0.05 + 0.012 * u;
+  var ca = Math.cos(a), sa = Math.sin(a);
+  return [c[0] + rad * (ca * f[0][0] + sa * f[1][0]), c[1] + rad * (ca * f[0][1] + sa * f[1][1]), c[2] + rad * (ca * f[0][2] + sa * f[1][2])];
+}
+function stemN(u, v) {
+  var f = stemFrame(u), a = v * TAU, ca = Math.cos(a), sa = Math.sin(a);
+  return [ca * f[0][0] + sa * f[1][0], ca * f[0][1] + sa * f[1][1], ca * f[0][2] + sa * f[1][2]];
+}
+addSurface(100, 14, stemFn, stemN, 1, function (u) { return u; }, function () { return 1; });
+
+/* leaves */
+function leafFn(alpha, s0, len) {
+  var B = stemC(s0), dx = Math.cos(alpha), dy = Math.sin(alpha);
+  return function (u, v) {
+    var w = 0.19 * Math.sin(PI * Math.pow(u, 0.75)), side = 2 * v - 1;
+    var mz = B[2] + 0.28 * u - 0.5 * u * u;
+    return [B[0] + dx * len * u - dy * side * w, B[1] + dy * len * u + dx * side * w, mz + 0.45 * Math.abs(side) * w];
+  };
+}
+addSurface(90, 28, leafFn(0.7, 0.38, 0.95), null, 2, function (u) { return u; }, function () { return 1; });
+addSurface(90, 28, leafFn(0.7 + PI + 0.5, 0.55, 0.8), null, 3, function (u) { return u; }, function () { return 1; });
+
+var N = bX.length;
+var X = new Float32Array(bX), Y = new Float32Array(bY), Z = new Float32Array(bZ);
+var NX = new Float32Array(bNX), NY = new Float32Array(bNY), NZ = new Float32Array(bNZ);
+var G = new Uint8Array(bG), K = new Float32Array(bK), R = new Float32Array(bR);
+bX = bY = bZ = bNX = bNY = bNZ = bG = bK = bR = null;
+
+/* framing: fit every spin angle inside the grid */
+var maxR = 0, umin = 1e9, umax = -1e9;
+(function () {
+  var ca = Math.cos(TILT), sa = Math.sin(TILT), a, i;
+  for (i = 0; i < N; i++) maxR = Math.max(maxR, Math.hypot(X[i], Y[i]));
+  for (a = 0; a < 12; a++) {
+    var cs = Math.cos(a * TAU / 12), sn = Math.sin(a * TAU / 12);
+    for (i = 0; i < N; i++) {
+      var y1 = X[i] * sn + Y[i] * cs, u = y1 * sa + Z[i] * ca;
+      if (u < umin) umin = u; if (u > umax) umax = u;
+    }
+  }
+})();
+var UX = 2 * maxR * 1.05 / COLS, UY = UX * ASPECT;
+var ROWS = Math.ceil((umax - umin) * 1.07 / UY);
+var CX = COLS / 2, CY = ROWS / 2 + (umax + umin) / 2 / UY;
+var CELLS = COLS * ROWS;
+
+var CH = new Uint8Array(CELLS), LV = new Uint8Array(CELLS), MT = new Uint8Array(CELLS);
+var WIN = new Int32Array(CELLS), DEP = new Float32Array(CELLS);
+var FR = [0, 0, 0, 0], ACT = [0, 0, 0, 0], GW = [1.3, 0.05, 0.06, 0.06];
+
+function nrm(a, b, c) { var l = Math.hypot(a, b, c) || 1; return [a / l, b / l, c / l]; }
+function act(g) { return Math.max(0, Math.min(1, g * 12, (1 - g) * 12)); }
+
+function renderFrame(t, angle) {
+  var ca = Math.cos(TILT), sa = Math.sin(TILT), cs = Math.cos(angle), sn = Math.sin(angle), i;
+  var gS = ease(t / 2.4), g1 = ease((t - 1.2) / 2.6), g2 = ease((t - 1.8) / 2.6), bl = ease((t - BLOOM_T0) / BLOOM_D);
+  FR[0] = 15 * PI + 0.3 - bl * (17 * PI + 0.3); FR[1] = 1 - gS; FR[2] = g1; FR[3] = g2;
+  ACT[0] = act(bl); ACT[1] = act(gS); ACT[2] = act(g1); ACT[3] = act(g2);
+  DEP.fill(-1e9); WIN.fill(-1);
+
+  for (i = 0; i < N; i++) {
+    var g = G[i], k = K[i];
+    if (g < 2 ? k < FR[g] : k > FR[g]) continue;
+    var x = X[i], y = Y[i], z = Z[i];
+    var x1 = x * cs - y * sn, y1 = x * sn + y * cs;
+    var fc = CX + x1 / UX; if (fc < 0 || fc >= COLS) continue;
+    var fr = CY - (y1 * sa + z * ca) / UY; if (fr < 0 || fr >= ROWS) continue;
+    var idx = (fr | 0) * COLS + (fc | 0), d = -y1 * ca + z * sa;
+    if (d > DEP[idx]) { DEP[idx] = d; WIN[idx] = i; }
+  }
+
+  var w2 = t * 0.7;
+  var L1 = nrm(-0.5, 0.62, 0.62), L2 = nrm(0.95 * Math.cos(w2), 0.35 + 0.3 * Math.sin(w2 * 1.3), 0.45);
+  var H1 = nrm(L1[0], L1[1], L1[2] + 1), H2 = nrm(L2[0], L2[1], L2[2] + 1);
+  var c;
+  for (c = 0; c < CELLS; c++) {
+    var w = WIN[c];
+    if (w < 0) { CH[c] = 0; continue; }
+    var gr = G[w];
+    var ndx = NX[w] * cs - NY[w] * sn, ndy = NX[w] * sn + NY[w] * cs, ndz = NZ[w];
+    var vx = ndx, vu = ndy * sa + ndz * ca, vz = -ndy * ca + ndz * sa;
+    if (vz < 0) { vx = -vx; vu = -vu; vz = -vz; }
+    var df1 = Math.max(0, vx * L1[0] + vu * L1[1] + vz * L1[2]);
+    var df2 = Math.max(0, vx * L2[0] + vu * L2[1] + vz * L2[2]);
+    var sp1 = Math.pow(Math.max(0, vx * H1[0] + vu * H1[1] + vz * H1[2]), 30);
+    var sp2 = Math.pow(Math.max(0, vx * H2[0] + vu * H2[1] + vz * H2[2]), 30);
+    var ao = gr === 0 ? 0.42 + 0.58 * Math.pow(R[w], 0.6) : 1;
+    var rim = Math.pow(1 - vz, 3);
+    var glow = Math.exp(-Math.pow((K[w] - FR[gr]) / GW[gr], 2)) * ACT[gr];
+    var lum = (0.06 + 0.5 * df1 + 0.26 * df2) * ao + (gr === 0 ? 0.3 : 0.45) * (sp1 + sp2) * ao + 0.14 * rim + 0.7 * glow;
+    if (lum > 1) lum = 1;
+    if (lum < 0.03) { CH[c] = 0; continue; }
+    var q = Math.pow((lum - 0.03) / 0.97, 0.85);
+    CH[c] = 1 + Math.min(RAMP.length - 1, (q * RAMP.length) | 0);
+    LV[c] = Math.min(NL - 1, (lum * NL) | 0);
+    MT[c] = gr === 0 ? 0 : 1;
+  }
+}
+/*ENGINE-END*/
+
+/*HEART-START*/
+var heartCx = COLS / 2, heartCy = ROWS / 2;
+
+function heartMask(s, hr) {
+  var mask = new Uint8Array(CELLS), cnt = 0, c, r;
+  for (r = 0; r < ROWS; r++) for (c = 0; c < COLS; c++) {
+    var u = (c + 0.5 - COLS / 2) / s, v = (hr - (r + 0.5)) * ASPECT / s;
+    var a = u * u + v * v - 1, f = a * a * a - u * u * v * v * v;
+    if (f <= 0) { mask[r * COLS + c] = 1; cnt++; }
+  }
+  return { mask: mask, cnt: cnt };
+}
+
+/* A heart of about M cells, shaded like a domed surface so it reads as a solid shape. */
+function buildHeart(M) {
+  var s = Math.min(30, Math.sqrt(M * ASPECT / 4.6)), hr, m, it, c, r;
+  for (it = 0; it < 8; it++) {
+    hr = ROWS * 0.45 + 0.125 * s / ASPECT;
+    m = heartMask(s, hr);
+    s = Math.min(31, s * Math.sqrt(M / Math.max(m.cnt, 1)));
+  }
+  hr = ROWS * 0.45 + 0.125 * s / ASPECT; m = heartMask(s, hr);
+  var mask = m.mask, D = new Float32Array(CELLS), i;
+  var wa = 1, wb = ASPECT, wc = Math.hypot(1, ASPECT);
+  for (i = 0; i < CELLS; i++) D[i] = mask[i] ? 1e9 : 0;
+  function rel(c0, r0, w, ic) { if (c0 < 0 || c0 >= COLS || r0 < 0 || r0 >= ROWS) return; var v = D[r0 * COLS + c0] + w; if (v < D[ic]) D[ic] = v; }
+  for (r = 0; r < ROWS; r++) for (c = 0; c < COLS; c++) {
+    i = r * COLS + c; if (!mask[i]) continue;
+    rel(c - 1, r, wa, i); rel(c, r - 1, wb, i); rel(c - 1, r - 1, wc, i); rel(c + 1, r - 1, wc, i);
+  }
+  for (r = ROWS - 1; r >= 0; r--) for (c = COLS - 1; c >= 0; c--) {
+    i = r * COLS + c; if (!mask[i]) continue;
+    rel(c + 1, r, wa, i); rel(c, r + 1, wb, i); rel(c + 1, r + 1, wc, i); rel(c - 1, r + 1, wc, i);
+  }
+  var Dm = 1;
+  for (i = 0; i < CELLS; i++) if (mask[i] && D[i] > Dm) Dm = D[i];
+  var H = new Float32Array(CELLS);
+  for (i = 0; i < CELLS; i++) if (mask[i]) { var t = Math.min(1, D[i] / Dm); H[i] = Math.sqrt(1 - (1 - t) * (1 - t)); }
+  function hAt(c0, r0) { return (c0 < 0 || c0 >= COLS || r0 < 0 || r0 >= ROWS) ? 0 : H[r0 * COLS + c0]; }
+
+  var Hs = Dm * 0.9, L1 = nrm(-0.5, 0.62, 0.62), L2 = nrm(0.7, 0.2, 0.55);
+  var H1 = nrm(L1[0], L1[1], L1[2] + 1), out = [], sx = 0, sy = 0;
+  for (r = 0; r < ROWS; r++) for (c = 0; c < COLS; c++) {
+    i = r * COLS + c; if (!mask[i]) continue;
+    var gx = (hAt(c + 1, r) - hAt(c - 1, r)) / 2, gy = (hAt(c, r - 1) - hAt(c, r + 1)) / (2 * ASPECT);
+    var n = nrm(-Hs * gx, -Hs * gy, 1);
+    var df1 = Math.max(0, n[0] * L1[0] + n[1] * L1[1] + n[2] * L1[2]);
+    var df2 = Math.max(0, n[0] * L2[0] + n[1] * L2[1] + n[2] * L2[2]);
+    var sp = Math.pow(Math.max(0, n[0] * H1[0] + n[1] * H1[1] + n[2] * H1[2]), 26);
+    var hash = (Math.sin(c * 12.9898 + r * 78.233) * 43758.5453) % 1; hash = hash < 0 ? hash + 1 : hash;
+    var lum = (0.1 + 0.62 * df1 + 0.28 * df2 + 0.4 * sp) * (0.94 + 0.06 * hash) * 1.08;
+    if (hash > 0.985) lum += 0.35;
+    lum = Math.max(0.05, Math.min(1, lum));
+    var q = Math.pow((lum - 0.03) / 0.97, 0.85);
+    out.push({ c: c + 0.5, r: r + 0.55, ch: Math.min(RAMP.length - 1, (q * RAMP.length) | 0), lv: Math.min(NL - 1, (lum * NL) | 0), mt: 0 });
+    sx += c + 0.5; sy += r + 0.55;
+  }
+  heartCx = sx / out.length; heartCy = sy / out.length;
+  return out;
+}
+/*HEART-END*/
+
+/* ---------- page ---------- */
+(function () {
+  var canvas = document.getElementById('rose'), stage = document.getElementById('stage');
+  var ctx = canvas.getContext('2d'), live = document.getElementById('live'), pauseBtn = document.getElementById('pause');
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+  var minStep = coarse ? 1 / 30 : 0;
+
+  document.getElementById('f-grid').textContent = COLS + ' × ' + ROWS + ' ячеек';
+  document.getElementById('f-pts').textContent = N.toLocaleString('ru-RU');
+  var rampEl = document.getElementById('ramp'), ri;
+  for (ri = 0; ri < RAMP.length; ri++) {
+    var sp = document.createElement('span');
+    sp.textContent = RAMP.charAt(ri);
+    sp.style.color = PAL[0][Math.min(NL - 1, Math.round(((ri + 0.5) / RAMP.length) * NL))];
+    rampEl.appendChild(sp);
+  }
+
+  var cw = 6, chh = 12, W = 0, H = 0, fontStr = '', fitW = 0, fitH = 0;
+  function fit() {
+    fitW = stage.clientWidth; fitH = window.innerHeight;
+    var maxW = stage.clientWidth || 360, maxH = Math.max(360, window.innerHeight * 0.88);
+    cw = maxW / COLS;
+    if (cw * ASPECT * ROWS > maxH) cw = maxH / (ASPECT * ROWS);
+    chh = cw * ASPECT; W = cw * COLS; H = chh * ROWS;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fontStr = '500 ' + (cw / 0.6 * 1.06).toFixed(2) + 'px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+    dirty = true;
+  }
+
+  /* ---- state: rose -> toheart -> heart -> torose -> rose ---- */
+  var state = 'rose', P = null, heartList = null, tt = 0, pendingNext = 'heart', lastBeat = 1;
+  var S_DUR = 1.3, G_DUR = 2.7, END = S_DUR + G_DUR;
+  var T = reduce ? BLOOM_END + 1 : 0, angle = 0.6, spin = reduce ? 0 : 0.32;
+  var paused = false, dragging = false, dirty = true, last = performance.now(), acc = 0;
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function say(msg) { live.textContent = msg; }
+
+  function snapshot() {
+    var out = [], c;
+    for (c = 0; c < CELLS; c++) if (CH[c]) out.push({ c: (c % COLS) + 0.5, r: ((c / COLS) | 0) + 0.55, ch: CH[c] - 1, lv: LV[c], mt: MT[c] });
+    return out;
+  }
+
+  function startTransition(from, to, next) {
+    var n = from.length, i, cx = 0, cy = 0;
+    function keyed(o) { return { o: o, k: o.c + (Math.random() - 0.5) * 4 }; }
+    var fs = from.map(keyed).sort(function (a, b) { return a.k - b.k; });
+    var ts = to.map(keyed).sort(function (a, b) { return a.k - b.k; });
+    for (i = 0; i < n; i++) { cx += from[i].c; cy += from[i].r; }
+    cx /= n; cy /= n;
+    P = [];
+    for (i = 0; i < n; i++) {
+      var f = fs[i].o, t = ts[Math.min(ts.length - 1, Math.floor(i * ts.length / n))].o;
+      var dx = f.c - cx, dy = (f.r - cy) * 0.6, l = Math.hypot(dx, dy) || 1, mag = 8 + Math.random() * 30;
+      var vx = dx / l * mag + (Math.random() - 0.5) * 14, vy = dy / l * mag * 0.6 + (Math.random() - 0.5) * 14 - 4;
+      P.push({
+        sc: f.c, sr: f.r, ex: clamp(f.c + vx, 1.5, COLS - 1.5), ey: clamp(f.r + vy, 1.5, ROWS - 1.5),
+        tc: t.c, tr: t.r, sch: f.ch, slv: f.lv, smt: f.mt, tch: t.ch, tlv: t.lv, tmt: t.mt,
+        d: Math.random() * 0.7, curl: (Math.random() - 0.5) * 10, ph: Math.random() * TAU,
+        px: f.c, py: f.r, pk: 0, pch: 0
+      });
+    }
+    state = next === 'heart' ? 'toheart' : 'torose'; pendingNext = next; tt = 0;
+  }
+
+  function finishTransition() {
+    if (pendingNext === 'heart') { state = 'heart'; tt = 0; say('Сердце собрано. Три клика вернут розу.'); }
+    else { state = 'rose'; P = null; say('Роза на месте.'); }
+    dirty = true;
+  }
+
+  function updateParticles(u) {
+    var i, p, x, y, ch, lv, mt, q, v, g, dx, dy, l, off;
+    for (i = 0; i < P.length; i++) {
+      p = P[i];
+      if (u < S_DUR) {
+        q = 1 - Math.pow(1 - u / S_DUR, 3);
+        x = p.sc + (p.ex - p.sc) * q + Math.sin(u * 10 + p.ph) * 0.4 * q;
+        y = p.sr + (p.ey - p.sr) * q + Math.cos(u * 9 + p.ph) * 0.25 * q;
+        ch = p.sch; mt = p.smt; lv = Math.min(NL - 1, p.slv + Math.round(10 * q));
+      } else {
+        v = (u - S_DUR - p.d) / (G_DUR - 0.7); g = ease(v);
+        dx = p.tc - p.ex; dy = p.tr - p.ey; l = Math.hypot(dx, dy) || 1; off = Math.sin(PI * g) * p.curl;
+        x = p.ex + dx * g - (dy / l) * off; y = p.ey + dy * g + (dx / l) * off * 0.5;
+        if (g >= 0.55) { ch = p.tch; mt = p.tmt; lv = p.tlv; }
+        else { ch = p.sch; mt = p.smt; lv = Math.min(NL - 1, p.slv + 10); }
+      }
+      p.px = x; p.py = y; p.pk = mt * NL + lv; p.pch = ch;
+    }
+  }
+
+  function beatScale() {
+    if (reduce) return 1;
+    var ph = tt * TAU * 1.1;
+    return 1 + 0.028 * (Math.pow(Math.max(0, Math.sin(ph)), 6) + 0.6 * Math.pow(Math.max(0, Math.sin(ph - 0.9)), 6));
+  }
+  function updateHeart() {
+    var b = beatScale(), i, p, tw = Math.floor(tt * 6);
+    lastBeat = b;
+    for (i = 0; i < P.length; i++) {
+      p = P[i];
+      p.px = heartCx + (p.tc - heartCx) * b; p.py = heartCy + (p.tr - heartCy) * b;
+      p.pch = p.tch; p.pk = p.tmt * NL + (reduce || (i * 7 + tw) % 23 ? p.tlv : NL - 1);
+    }
+  }
+
+  /* ---- drawing ---- */
+  var lists = [], li;
+  for (li = 0; li < 2 * NL; li++) lists.push([]);
+  var motes = [], spawnAcc = 0, MOTE = ['.', '*', "'", '+', '`', '·'];
+
+  function beginDraw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.font = fontStr; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (var k = 0; k < lists.length; k++) lists[k].length = 0;
+  }
+  function drawCells() {
+    var k, c, a;
+    for (c = 0; c < CELLS; c++) if (CH[c]) lists[MT[c] * NL + LV[c]].push(c);
+    for (k = 0; k < lists.length; k++) {
+      var arr = lists[k]; if (!arr.length) continue;
+      ctx.fillStyle = PAL[k >= NL ? 1 : 0][k % NL];
+      for (a = 0; a < arr.length; a++) {
+        var cell = arr[a];
+        ctx.fillText(RAMP.charAt(CH[cell] - 1), ((cell % COLS) + 0.5) * cw, (((cell / COLS) | 0) + 0.55) * chh);
+      }
+    }
+  }
+  function drawParticles() {
+    var k, a, i;
+    for (i = 0; i < P.length; i++) lists[P[i].pk].push(i);
+    for (k = 0; k < lists.length; k++) {
+      var arr = lists[k]; if (!arr.length) continue;
+      ctx.fillStyle = PAL[k >= NL ? 1 : 0][k % NL];
+      for (a = 0; a < arr.length; a++) { var p = P[arr[a]]; ctx.fillText(RAMP.charAt(p.pch), p.px * cw, p.py * chh); }
+    }
+  }
+  function drawMotes() {
+    for (var m = 0; m < motes.length; m++) {
+      var p = motes[m], f = p.age / p.life;
+      ctx.globalAlpha = Math.sin(PI * f) * 0.9;
+      ctx.fillStyle = p.warm ? '#f2c98a' : '#ffb3bc';
+      ctx.fillText(p.ch, p.c * cw, p.r * chh);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function stepMotes(dt) {
+    var ok = state === 'heart' || (state === 'rose' && T > BLOOM_T0 + 3.5);
+    if (ok) {
+      var mx = state === 'heart' ? heartCx : CX, my = state === 'heart' ? heartCy : CY - 0.5 * Math.cos(TILT) / UY;
+      var spread = state === 'heart' ? 0.24 : 0.2;
+      spawnAcc += dt * (state === 'heart' || T > BLOOM_END - 1 ? 16 : 7);
+      while (spawnAcc >= 1 && motes.length < 90) {
+        spawnAcc -= 1;
+        var ang = Math.random() * TAU, rad = Math.sqrt(Math.random()) * COLS * spread;
+        motes.push({
+          c: mx + Math.cos(ang) * rad, r: my + Math.sin(ang) * rad * 0.5,
+          vc: (Math.random() - 0.5) * 2.5, vr: -(1.5 + Math.random() * 3.5),
+          age: 0, life: 2.5 + Math.random() * 3, ch: MOTE[(Math.random() * MOTE.length) | 0], warm: Math.random() < 0.35
+        });
+      }
+    }
+    for (var m = motes.length - 1; m >= 0; m--) {
+      var p = motes[m]; p.age += dt;
+      if (p.age >= p.life) { motes.splice(m, 1); continue; }
+      p.c += (p.vc + Math.sin(p.age * 2 + m) * 1.2) * dt; p.r += p.vr * dt;
+    }
+  }
+
+  function render() {
+    beginDraw();
+    if (state === 'rose') { renderFrame(T, angle); drawCells(); }
+    else {
+      if (state === 'heart') updateHeart(); else updateParticles(Math.min(tt, END));
+      drawParticles();
+    }
+    drawMotes();
+  }
+
+  function frame(now) {
+    requestAnimationFrame(frame);
+    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    acc += dt; if (acc < minStep) return;
+    var step = acc; acc = 0;
+    var moving = !paused && !reduce;
+    if (moving) {
+      if (state === 'rose') { T += step; if (!dragging) angle += step * spin; }
+      else if (state === 'heart') { tt += step; }
+      else { tt += step; if (tt >= END) finishTransition(); }
+      stepMotes(step);
+    }
+    if (moving || dirty) { render(); dirty = false; }
+  }
+
+  /* ---- triple click / tap ---- */
+  function trigger() {
+    if (state === 'toheart' || state === 'torose') return;
+    if (state === 'rose') {
+      renderFrame(T, angle);
+      var snap = snapshot();
+      if (!snap.length) return;
+      heartList = buildHeart(snap.length);
+      say('Роза рассыпается на частицы и собирается в сердце.');
+      startTransition(snap, heartList, 'heart');
+    } else {
+      var b = lastBeat, from = heartList.map(function (o) {
+        return { c: heartCx + (o.c - heartCx) * b, r: heartCy + (o.r - heartCy) * b, ch: o.ch, lv: o.lv, mt: o.mt };
+      });
+      T = BLOOM_END + 1; renderFrame(T, angle);
+      say('Сердце рассыпается и снова становится розой.');
+      startTransition(from, snapshot(), 'rose');
+    }
+    motes.length = 0; spawnAcc = 0;
+    if (reduce) { tt = END; finishTransition(); }
+    dirty = true;
+  }
+
+  var lastX = 0, lastY = 0, moved = 0, tapN = 0, tapT = 0;
+  canvas.addEventListener('pointerdown', function (e) {
+    dragging = true; lastX = e.clientX; lastY = e.clientY; moved = 0;
+    try { canvas.setPointerCapture(e.pointerId); } catch (x) {}
+  });
+  canvas.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - lastX; moved += Math.abs(dx) + Math.abs(e.clientY - lastY);
+    lastX = e.clientX; lastY = e.clientY;
+    if (state === 'rose') { angle += dx * 0.012; dirty = true; }
+  });
+  canvas.addEventListener('pointerup', function (e) {
+    var wasDrag = dragging; dragging = false;
+    if (!wasDrag || e.button !== 0 || moved > 8) { tapN = 0; return; }
+    var now = performance.now();
+    tapN = (now - tapT < 500) ? tapN + 1 : 1; tapT = now;
+    if (tapN >= 3) { tapN = 0; trigger(); }
+  });
+  canvas.addEventListener('pointercancel', function () { dragging = false; tapN = 0; });
+  canvas.addEventListener('dblclick', function (e) { e.preventDefault(); });
+
+  document.getElementById('replay').addEventListener('click', function () {
+    state = 'rose'; P = null; tt = 0; T = reduce ? BLOOM_END + 1 : 0; motes.length = 0; spawnAcc = 0; paused = false;
+    pauseBtn.textContent = 'Пауза'; dirty = true;
+  });
+  pauseBtn.addEventListener('click', function () {
+    paused = !paused; this.textContent = paused ? 'Дальше' : 'Пауза';
+  });
+
+  /* Safari fires resize whenever the address bar slides; refit only on a real size change */
+  window.addEventListener('resize', function () {
+    if (Math.abs(stage.clientWidth - fitW) > 1 || Math.abs(window.innerHeight - fitH) > 160) fit();
+  });
+  if (document.fonts && document.fonts.load) document.fonts.load('500 12px "JetBrains Mono"').then(function () { dirty = true; });
+  fit();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
